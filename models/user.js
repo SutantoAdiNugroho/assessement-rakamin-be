@@ -12,9 +12,19 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      phone: {
+      email: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      token: {
+        type: Sequelize.STRING,
+      },
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      address: {
+        type: Sequelize.STRING,
       },
     },
     { timestamps: true }
