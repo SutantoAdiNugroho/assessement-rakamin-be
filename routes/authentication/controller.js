@@ -25,19 +25,20 @@ module.exports = {
         return errorResponse(req, res, result);
       }
 
-      const hasPassword = await hashPassword(req.body.password);
-      const genToken = await generateToken(req.body);
-
       // continue registration process
+      const hasPassword = await hashPassword(req.body.password);
       const userRegistration = await db.users.create({
         ...req.body,
         password: hasPassword,
-        token: genToken,
       });
-      const { full_name, email } = userRegistration;
+
+      const { fullName, email, id } = userRegistration;
+      const genToken = await generateToken(req.body, id);
+
+      await db.users.update({ token: genToken }, { where: { id } });
 
       result = {
-        data: { full_name, email },
+        data: { fullName, email },
         message: 'User successfully created',
       };
 
@@ -73,12 +74,12 @@ module.exports = {
       }
 
       //Successfully validation
-      let { full_name, token } = currentUser;
+      let { fullName, token } = currentUser;
 
       result = {
         status: status.OK,
         message: 'Login succesfully',
-        data: { full_name, token },
+        data: { fullName, token },
       };
 
       return successResponse(req, res, status.OK, result);

@@ -19,9 +19,9 @@ router.post(
 router.post(
   '/user/register',
   [
-    checkBody('full_name')
+    checkBody('fullName')
       .isString()
-      .withMessage('full_name must be filled and type is string!'),
+      .withMessage('fullName must be filled and type is string!'),
     checkBody('email')
       .isString()
       .withMessage('email must be filled and type is string!'),

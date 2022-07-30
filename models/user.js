@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         primaryKey: true,
       },
-      full_name: {
+      fullName: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -25,6 +25,16 @@ module.exports = (sequelize, Sequelize) => {
       },
       address: {
         type: Sequelize.STRING,
+      },
+    },
+    {
+      hooks: {
+        afterCreate: (record) => {
+          delete record.dataValues.password;
+        },
+        afterUpdate: (record) => {
+          delete record.dataValues.password;
+        },
       },
     },
     { timestamps: true }

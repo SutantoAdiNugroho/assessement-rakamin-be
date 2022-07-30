@@ -1,4 +1,4 @@
-const { PORT, JWT_SECRET_KEY } = require('./environment');
+const { PORT, JWT_SECRET_KEY, ENV } = require('./environment');
 const dbConfig = require('./db.config');
 
-module.exports = { PORT, JWT_SECRET_KEY, dbConfig };
+module.exports = { PORT, JWT_SECRET_KEY, ENV, dbConfig };

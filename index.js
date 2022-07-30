@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./models');
 const { errorNotFoundHandle, errorInternalHandle } = require('./helpers');
-const { PORT } = require('./config');
+const { PORT, ENV } = require('./config');
 
 const app = express();
 
@@ -11,8 +11,10 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const configSync = ENV == 'development' ? { force: true } : {};
+
 db.sequelize
-  .sync({ force: true })
+  .sync({ ...configSync })
   .then(() => {
     console.log('DB has successfully connected');
   })
@@ -23,9 +25,10 @@ db.sequelize
 // list of routes
 app.use('/', require('./routes'));
 app.use('/api/auth', require('./routes/authentication'));
+app.use('/api/chat', require('./routes/chat'));
 
 // Not found handle
-app.get('*', function (req, res) {
+app.use('*', function (req, res) {
   return errorNotFoundHandle(req, res);
 });
 
