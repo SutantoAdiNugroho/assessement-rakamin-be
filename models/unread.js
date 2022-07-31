@@ -1,6 +1,6 @@
 module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define(
-    'questions',
+    'unreads',
     {
       id: {
         type: Sequelize.UUID,
@@ -8,15 +8,12 @@ module.exports = (sequelize, Sequelize) => {
         allowNull: false,
         primaryKey: true,
       },
-    },
-    { timestamps: true },
-    {
-      hooks: {
-        afterCreate: (record) => {
-          delete record.dataValues.questionId;
-        },
+      count: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
       },
-    }
+    },
+    { timestamps: true }
   );
 
   return User;

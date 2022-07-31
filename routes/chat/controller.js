@@ -27,10 +27,18 @@ module.exports = {
       }
 
       // create base conversation
-      const questionCreate = await db.questions.create({
-        fromUserId: req.userId,
-        toUserId: req.body.receiverId,
-      });
+      const questionCreate = await db.questions
+        .create({
+          fromUserId: req.userId,
+          toUserId: req.body.receiverId,
+        })
+        .then(async (result) => {
+          await db.unreads.bulkCreate([
+            { userId: result.fromUserId, questionId: result.id },
+            { userId: result.toUserId, questionId: result.id, count: 1 },
+          ]);
+          return result;
+        });
       const answerCreate = await db.answers.create({
         content: req.body.content,
         userId: req.userId,
@@ -54,7 +62,7 @@ module.exports = {
   replyChat: async (req, res, next) => {
     try {
       // run validation before create conversation
-      const currentChat = await db.questions.findByPk(req.body.questionId);
+      const currentChat = await db.questions.findByPk(req.body.chatId);
 
       if (!currentChat) {
         result.status = status.BAD_REQUEST;
@@ -72,11 +80,28 @@ module.exports = {
       }
 
       // create reply chat
-      const answerCreate = await db.answers.create({
-        content: req.body.content,
-        userId: req.userId,
-        questionId: currentChat.id,
-      });
+      const receiverUserId =
+        currentChat.fromUserId == req.userId
+          ? currentChat.toUserId
+          : currentChat.fromUserId;
+      const answerCreate = await db.answers
+        .create({
+          content: req.body.content,
+          userId: req.userId,
+          questionId: currentChat.id,
+        })
+        .then(async (result) => {
+          await db.unreads.update(
+            { count: 0 },
+            { where: { userId: req.userId, questionId: currentChat.id } }
+          );
+          await db.unreads.increment('count', {
+            by: 1,
+            where: { userId: receiverUserId, questionId: currentChat.id },
+          });
+
+          return result;
+        });
 
       currentChat.changed('updatedAt', true);
       await currentChat.update({
@@ -123,7 +148,7 @@ module.exports = {
             {
               model: db.answers,
               as: 'answers',
-              attributes: { exclude: ['questionId', 'userId', 'updatedAt'] },
+              attributes: { exclude: ['questionId', 'userId', 'createdAt'] },
               include: [
                 {
                   model: db.users,
@@ -131,6 +156,12 @@ module.exports = {
                   attributes: ['id', 'fullName'],
                 },
               ],
+            },
+            {
+              model: db.unreads,
+              as: 'unreads',
+              where: { userId: req.userId },
+              attributes: ['count'],
             },
           ],
           attributes: {
@@ -142,14 +173,13 @@ module.exports = {
           result.forEach((chat) => {
             chats.push({
               id: chat.id,
+              unreadCount: chat.unreads.length ? chat.unreads[0].count : 0,
               partnerChat:
                 req.userId == chat.sender.id ? chat.receiver : chat.sender,
               lastAnswer: chat.answers[0],
               updatedAt: chat.updatedAt,
             });
           });
-
-          return result;
         })
         .catch((error) => {
           throw error;
@@ -162,7 +192,6 @@ module.exports = {
       }
 
       result.data = chats;
-
       return successResponse(req, res, status.OK, result);
     } catch (error) {
       next(error);
@@ -170,7 +199,7 @@ module.exports = {
   },
   getChatDetail: async (req, res, next) => {
     try {
-      const currentChat = await db.questions.findByPk(req.params.questionId, {
+      const currentChat = await db.questions.findByPk(req.params.chatId, {
         include: [
           {
             model: db.answers,
@@ -196,10 +225,48 @@ module.exports = {
         return errorResponse(req, res, result);
       }
 
+      await db.unreads.update(
+        { count: 0 },
+        { where: { questionId: currentChat.id, userId: req.userId } }
+      );
+
       // return all chat answers
       result = {
         message: 'Successfully get chat detail',
         data: { answers: currentChat.answers },
+      };
+
+      return successResponse(req, res, status.OK, result);
+    } catch (error) {
+      next(error);
+    }
+  },
+  checkChatSession: async (req, res, next) => {
+    try {
+      let isChatCreated = false;
+
+      const receiverChat = await db.users.findByPk(req.body.receiverId);
+      const currentChat = await db.questions.findOne({
+        where: { fromUserId: req.userId, toUserId: req.body.receiverId },
+      });
+
+      if (!receiverChat) {
+        result.status = status.BAD_REQUEST;
+        result.message = 'Receiver chat is not found';
+        return errorResponse(req, res, result);
+      }
+
+      if (currentChat) {
+        await db.unreads.update(
+          { count: 0 },
+          { where: { questionId: currentChat.id, userId: req.userId } }
+        );
+        isChatCreated = true;
+      }
+
+      result = {
+        message: 'Successfully check chat session',
+        data: { isChatCreated },
       };
 
       return successResponse(req, res, status.OK, result);

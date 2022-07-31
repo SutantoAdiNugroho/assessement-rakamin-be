@@ -26,6 +26,7 @@ db.sequelize
 app.use('/', require('./routes'));
 app.use('/api/auth', require('./routes/authentication'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/users', require('./routes/users'));
 
 // Not found handle
 app.use('*', function (req, res) {

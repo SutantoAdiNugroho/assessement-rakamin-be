@@ -22,9 +22,9 @@ router.post(
 router.post(
   '/reply',
   [
-    checkBody('questionId')
+    checkBody('chatId')
       .isString()
-      .withMessage('questionId must be filled and type is string!'),
+      .withMessage('chatId must be filled and type is string!'),
     checkBody('content')
       .isString()
       .withMessage('content must be filled and type is string!'),
@@ -33,9 +33,19 @@ router.post(
   controller.replyChat
 );
 router.get(
-  '/:questionId/detail',
+  '/:chatId/detail',
   middleware.authenticate,
   controller.getChatDetail
+);
+router.post(
+  '/chat_session',
+  [
+    checkBody('receiverId')
+      .isString()
+      .withMessage('receiverId must be filled and type is string!'),
+  ],
+  middleware.authenticate,
+  controller.checkChatSession
 );
 
 module.exports = router;
