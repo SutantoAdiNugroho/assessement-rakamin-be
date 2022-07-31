@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('./swagger.json');
 const db = require('./models');
 const { errorNotFoundHandle, errorInternalHandle } = require('./helpers');
 const { PORT, ENV } = require('./config');
@@ -24,6 +26,7 @@ db.sequelize
 
 // list of routes
 app.use('/', require('./routes'));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerJsdoc));
 app.use('/api/auth', require('./routes/authentication'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/users', require('./routes/users'));

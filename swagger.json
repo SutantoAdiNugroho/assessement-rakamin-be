@@ -1,0 +1,632 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API Documentation for simple chat-api",
+    "description": "Chat Restful webservice application",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "API for authentication"
+    },
+    {
+      "name": "Users",
+      "description": "API for users service"
+    },
+    {
+      "name": "Chat",
+      "description": "API for chat service"
+    }
+  ],
+  "produces": ["application/json"],
+  "paths": {
+    "/api/auth/register": {
+      "parameters": [
+        {
+          "name": "fullName",
+          "in": "body",
+          "required": true,
+          "description": "Full name of the user",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "in": "body",
+          "required": true,
+          "description": "Email of the user",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "in": "body",
+          "required": true,
+          "description": "Password of the user",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "in": "body",
+          "required": false,
+          "description": "Address of the user",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User registration",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/Register"
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "parameters": [
+        {
+          "name": "email",
+          "in": "body",
+          "required": true,
+          "description": "Email of the user",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "in": "body",
+          "required": true,
+          "description": "Password of the user",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login to app",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/Login"
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/chat/all": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "get": {
+        "tags": ["Chat"],
+        "summary": "Get all my chat that involved",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/ChatAll"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/chat/:chatId/detail": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "get": {
+        "tags": ["Chat"],
+        "summary": "Get all reply from specific chat",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/ChatDetail"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/chat/chat_session": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        },
+        {
+          "name": "receiverId",
+          "in": "body",
+          "required": true,
+          "description": "The ID user who will receive a chat from us",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "post": {
+        "tags": ["Chat"],
+        "summary": "For check chat session, will be called every user get into chatroom",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/ChatSession"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/chat/new": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        },
+        {
+          "name": "receiverId",
+          "in": "body",
+          "required": true,
+          "description": "The ID user who will receive a chat from us",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "in": "body",
+          "required": true,
+          "description": "The content of our chat",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "post": {
+        "tags": ["Chat"],
+        "summary": "Create a new chat",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/ChatNew"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/chat/reply": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        },
+        {
+          "name": "chatId",
+          "in": "body",
+          "required": true,
+          "description": "The ID chat",
+          "type": "string"
+        },
+        {
+          "name": "content",
+          "in": "body",
+          "required": true,
+          "description": "The content of our chat",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "post": {
+        "tags": ["Chat"],
+        "summary": "Reply to existing chat",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/ChatReply"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "parameters": [
+        {
+          "name": "Authorization",
+          "in": "headers",
+          "required": true,
+          "description": "The user token",
+          "type": "string"
+        },
+        {
+          "name": "fullName",
+          "in": "query",
+          "required": false,
+          "description": "Full name of user that want to search",
+          "type": "string"
+        }
+      ],
+      "produces": ["application/json"],
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get all of users",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/AllUsers"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Register": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "Login": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "token": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "ChatSession": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "isChatAlreadyCreated": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "ChatNew": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            },
+            "answers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  },
+                  "questionId": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ChatReply": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "ChatDetail": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "answers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "createdAt": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ChatAll": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "unreadCount": {
+                "type": "number"
+              },
+              "partnerChat": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "fullName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "lastAnswer": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "type": "string"
+                  },
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "fullName": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "AllUsers": {
+      "required": ["name", "_id", "companies"],
+      "properties": {
+        "status": {
+          "type": "number",
+          "uniqueItems": true
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "fullName": {
+                "type": "number"
+              },
+              "email": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

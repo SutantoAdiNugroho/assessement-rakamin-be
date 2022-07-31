@@ -5,7 +5,7 @@ const { buildCheckFunction } = require('express-validator');
 const checkBody = buildCheckFunction(['body']);
 
 router.post(
-  '/user/login',
+  '/login',
   [
     checkBody('email')
       .isString()
@@ -17,7 +17,7 @@ router.post(
   controller.login
 );
 router.post(
-  '/user/register',
+  '/register',
   [
     checkBody('fullName')
       .isString()

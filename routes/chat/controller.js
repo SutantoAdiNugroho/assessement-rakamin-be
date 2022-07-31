@@ -243,7 +243,7 @@ module.exports = {
   },
   checkChatSession: async (req, res, next) => {
     try {
-      let isChatCreated = false;
+      let isChatAlreadyCreated = false;
 
       const receiverChat = await db.users.findByPk(req.body.receiverId);
       const currentChat = await db.questions.findOne({
@@ -261,12 +261,12 @@ module.exports = {
           { count: 0 },
           { where: { questionId: currentChat.id, userId: req.userId } }
         );
-        isChatCreated = true;
+        isChatAlreadyCreated = true;
       }
 
       result = {
         message: 'Successfully check chat session',
-        data: { isChatCreated },
+        data: { isChatAlreadyCreated },
       };
 
       return successResponse(req, res, status.OK, result);
